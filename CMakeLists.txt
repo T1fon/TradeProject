@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(TradeProject VERSION 0.1 LANGUAGES CXX)
+set(PROJECT_VERSION_MAJOR 0)
+set(PROJECT_VERSION_MINOR 1)
+set(PROJECT_VERSION_PATCH 1)
+set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
+
+project(TradeProject VERSION ${PROJECT_VERSION} LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -18,7 +23,10 @@ qt_add_qml_module(appTradeProject
     URI TradeProject
     VERSION 1.0
     QML_FILES src/Main.qml
+    QML_FILES src/View/OptionWindow/OptionWindow_V.qml
+    RESOURCES src/View/OptionWindow/CMakeLists.txt
 )
+target_compile_definitions(appTradeProject PRIVATE PROJECT_VERSION="${PROJECT_VERSION}")
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an

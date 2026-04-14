@@ -1,8 +1,15 @@
 import QtQuick
+import QtQuick.Window
+import QtQuick.Controls
+import QtQuick.Dialogs
 
 Window {
-    width: 640
-    height: 480
+    width: 1920
+    height: 1080
+    property real swidth : width / 100
+    property real sheight : height / 100
+
     visible: true
-    title: qsTr("Hello World")
+    title: qsTr("TradeProject ")
+
 }
