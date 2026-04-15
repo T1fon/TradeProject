@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 set(PROJECT_VERSION_MAJOR 0)
 set(PROJECT_VERSION_MINOR 1)
-set(PROJECT_VERSION_PATCH 1)
+set(PROJECT_VERSION_PATCH 3)
 set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
 
 project(TradeProject VERSION ${PROJECT_VERSION} LANGUAGES CXX)
@@ -25,6 +25,9 @@ qt_add_qml_module(appTradeProject
     QML_FILES src/Main.qml
     QML_FILES src/View/OptionWindow/OptionWindow_V.qml
     RESOURCES src/View/OptionWindow/CMakeLists.txt
+    RESOURCES src/Model/CMakeLists.txt
+    SOURCES src/Model/XLModel/xlmodel.h src/Model/XLModel/xlmodel.cpp
+    RESOURCES src/Model/XLModel/CMakeLists.txt
 )
 target_compile_definitions(appTradeProject PRIVATE PROJECT_VERSION="${PROJECT_VERSION}")
 
