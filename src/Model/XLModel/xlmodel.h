@@ -1,20 +1,13 @@
 #ifndef XLMODEL_H
 #define XLMODEL_H
 
-#include <vector>
 #include <QString>
-struct CounterpartyData
-{
-    QString name;
-    QString INN;
-    QString KPP;
-};
-
-
+#include <QColor>
+#include "xlsxdocument.h"
 struct XLData
 {
-    CounterpartyData cpd;
     int transaction;
+    double valSum;
     double sum;
     QString appointment;
     QString type;
@@ -26,14 +19,19 @@ class XLModel
 {
 public:
     XLModel();
-    bool getData(const QString& way);
+    bool loadData(const QString& way);
     bool saveData(const QString& way);
+    int getLength();
+    void setWay(const QString& way);
     ~XLModel();
 private:
-    std::vector<XLData> __data;
-    void __extractData(const QString& way);
-    void __saveData(const QString& way);
-
+    QVector<XLData> __data;
+    bool __extractData();
+    bool __saveData(const QString& way);
+    QString __way;
+    int __length;
+signals:
+    void progressUpdated(int currentCount, int totalCount);
 };
 
 #endif // XLMODEL_H

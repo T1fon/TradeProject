@@ -12,6 +12,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Qt6 6.4 REQUIRED COMPONENTS Quick)
 
 add_subdirectory(src)
+add_subdirectory(src/QXlsx/QXlsx)
 
 qt_standard_project_setup()
 
@@ -44,6 +45,7 @@ set_target_properties(appTradeProject PROPERTIES
 
 target_link_libraries(appTradeProject
     PRIVATE Qt6::Quick
+    QXlsx::QXlsx
 )
 
 include(GNUInstallDirs)
