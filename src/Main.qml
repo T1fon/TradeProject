@@ -144,19 +144,93 @@ Window {
             }
         }
     }
-
     Rectangle
     {
-        width: parent.width
-        height: parent.height * 0.9
-        y: sheight * 25
-        color: "blue"
-
-        Loader
+        id: user_rect
+        width: 0
+        height: 0
+        visible: false
+        Menu
         {
-            id: loader
+            id: userMenu
+            y: profile_rect.y + profile_rect.height
+            x: swidth * 90
+            width: swidth * 10
+            height: sheight * 15
+            Rectangle
+            {
+
+            }
+
+            MenuItem
+            {
+                height: sheight * 2.9
+                text: "Действие 2";
+                font.pixelSize: swidth * 0.75
+                onTriggered: console.log("Действие 1")
+            }
+            MenuItem
+            {
+                height: sheight * 2.9
+                text: "Действие 3";
+                font.pixelSize: swidth * 0.75
+                onTriggered: console.log("Действие 1")
+            }
+        }
+    }
+    Button
+    {
+        id: profile_rect
+        width: swidth * 4.5
+        height: sheight * 6.3
+        x: swidth * 95.47
+        background: Rectangle
+        {
+            border
+            {
+                color: "black"
+                width: swidth * 0.05
+            }
+            radius: 0
+        }
+        contentItem: Row
+        {
+            spacing: swidth * 0.05
             anchors.fill: parent
-            source: ""
+            Rectangle
+            {
+                id: img_rect;
+                height: sheight * 5.5
+                width: swidth * 3
+                y: sheight * 0.225
+                color: "yellow"
+                radius: width / 2
+                Image
+                    {
+                        id: profile_img;
+                        //source: "file"
+                        clip: true
+                        anchors.fill: parent
+                    }
+            }
+            Rectangle
+            {
+                width: swidth * 1.2
+                height: sheight * 5.8
+                y: sheight * 0.35
+                Text
+                {
+                    text: qsTr("1")
+                    font.pixelSize: swidth * 0.75
+                    verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignHCenter
+                    anchors.fill: parent
+                }
+            }
+        }
+        onClicked:
+        {
+          userMenu.open()
         }
     }
 }
