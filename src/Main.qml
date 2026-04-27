@@ -9,6 +9,8 @@ import "View/OptionWindow"
 Window {
     width: 1920
     height: 1080
+    property string teme: "Светлая"
+    property bool teme_flag: true
     property real swidth : width / 100
     property real sheight : height / 100
     color: "red"
@@ -154,27 +156,89 @@ Window {
         {
             id: userMenu
             y: profile_rect.y + profile_rect.height
-            x: swidth * 90
-            width: swidth * 10
-            height: sheight * 15
+            x: swidth * 82.5
+            width: swidth * 15
+            height: sheight * 22.8
             Rectangle
             {
+                id: img_rect_m;
+                height: sheight * 7.5
+                width: swidth * 4.25
+                x: swidth * 5.25
+                color: "green"
+                radius: width / 2
+                Image
+                    {
+                        id: profile_img_m;
+                        //source: "file"
+                        clip: true
+                        anchors.fill: parent
+                    }
+            }
+            Rectangle
+            {
+                id: name_sername_rect
+                width: swidth * 12
+                height: sheight * 2.5
+                x: swidth * 1.5
+                y: img_rect_m.y + img_rect_m.height + sheight * 1.6
+                Text
+                {
+                    id:name_sername
+                    width: parent.width
+                    height: parent.height
+                    anchors.fill: parent
+                    font.pixelSize: swidth * 1.125
+                    text: "Aкакий Акакьевич"
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
 
+                }
+            }
+            Rectangle
+            {
+                id: lvl_rect
+                width: swidth * 8
+                height: sheight * 2.5
+                x: swidth * 3.5
+                y: name_sername_rect.y + name_sername_rect.height
+                Text
+                {
+                    id:lvl
+                    width: parent.width
+                    height: parent.height
+                    anchors.fill: parent
+                    font.pixelSize: swidth
+                    text: "Менеджер"
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+
+                }
             }
 
             MenuItem
             {
-                height: sheight * 2.9
-                text: "Действие 2";
-                font.pixelSize: swidth * 0.75
-                onTriggered: console.log("Действие 1")
+                height: sheight * 2.5
+                text: "Настройка профиля";
+                font.pixelSize: swidth * 1.25
             }
             MenuItem
             {
-                height: sheight * 2.9
-                text: "Действие 3";
-                font.pixelSize: swidth * 0.75
-                onTriggered: console.log("Действие 1")
+                height: sheight * 2.5
+                text: "Опции";
+                font.pixelSize: swidth * 1.25
+            }
+            MenuItem
+            {
+                height: sheight * 2.5
+                text: "Тема: " + teme;
+                font.pixelSize: swidth * 1.25
+            }
+            MenuItem
+            {
+                height: sheight * 2.5
+                text: "Выход";
+                font.pixelSize: swidth * 1.25
             }
         }
     }
