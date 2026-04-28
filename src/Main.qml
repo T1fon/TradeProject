@@ -15,6 +15,7 @@ Window {
     property real sheight : height / 100
     color: "red"
 
+    property string opt_w: "View/OptionWindow/OptionWindow_V.qml"
     Loader
     {
         id: win_loader
@@ -143,6 +144,13 @@ Window {
                     }
                     radius: 0
                 }
+                onClicked:
+                {
+                    win_loader.source = opt_w
+                    win_loader.item.show()
+                    win_loader.item.raise()
+                    win_loader.item.requestActivate()
+                }
             }
         }
     }
@@ -227,6 +235,13 @@ Window {
                 height: sheight * 2.5
                 text: "Опции";
                 font.pixelSize: swidth * 1.25
+                onClicked:
+                {
+                    win_loader.source = opt_w
+                    win_loader.item.show()
+                    win_loader.item.raise()
+                    win_loader.item.requestActivate()
+                }
             }
             MenuItem
             {
@@ -297,4 +312,6 @@ Window {
           userMenu.open()
         }
     }
+
+
 }
