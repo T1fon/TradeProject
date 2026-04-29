@@ -2,6 +2,7 @@ import QtQuick 2.15
 import QtQuick.Window
 import QtQuick.Controls 2.15
 import QtQuick.Layouts
+import QtQuick.Dialogs
 
 Window
 {
@@ -81,9 +82,22 @@ Window
                anchors.fill: parent
                text: "Изменить"
                font.pixelSize: swidth * 2.8
+               onClicked:
+               {
+                   filer.open()
+               }
            }
        }
     }
+    FileDialog
+    {
+        id: filer
+        onAccepted:
+        {
+            dbWay.text = filer.currentFile
+        }
+    }
+
     Rectangle
     {
         id: dbButRect
@@ -108,6 +122,26 @@ Window
                 anchors.fill: parent
                 text: "Загрузить базу"
                 font.pixelSize: swidth * 2.2
+                onClicked:
+                {
+                    filerLoad.open()
+                }
+            }
+        }
+        FileDialog
+        {
+            id: filerLoad
+            onAccepted:
+            {
+                if(dbWay.text === "")
+                {
+                    mess.text = "Не найден файл БД"
+                    mess.open()
+                }
+                else
+                {
+
+                }
             }
         }
         Rectangle
@@ -130,6 +164,11 @@ Window
             }
         }
     }
+    MessageDialog
+    {
+        id: mess
+    }
+
     Rectangle
     {
         id: userText
@@ -150,6 +189,7 @@ Window
         }
 
     }
+
     Rectangle
     {
         id: oneRowRect
