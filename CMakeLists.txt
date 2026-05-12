@@ -26,6 +26,7 @@ qt_add_qml_module(appTradeProject
     RESOURCES
     QML_FILES src/Main.qml
     QML_FILES src/View/OptionWindow/OptionWindow_V.qml
+    QML_FILES src/View/UserWindow/UserWindow.qml
 )
 target_compile_definitions(appTradeProject PRIVATE PROJECT_VERSION="${PROJECT_VERSION}")
 

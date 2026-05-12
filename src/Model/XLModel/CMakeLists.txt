@@ -6,7 +6,7 @@ add_library(XLModel STATIC
   xlmodel.h
 )
 target_include_directories(XLModel PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../QXlsx-master/QXlsx/header)
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../QXlsx/QXlsx/header)
 
 target_link_libraries(XLModel PRIVATE
   Qt6::Core

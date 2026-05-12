@@ -124,7 +124,13 @@ Window
                 font.pixelSize: swidth * 2.2
                 onClicked:
                 {
-                    filerLoad.open()
+                    if(dbWay.text !=="")
+                        filerLoad.open()
+                    else
+                    {
+                        mess.text = "Не найден файл БД"
+                        mess.open()
+                    }
                 }
             }
         }
@@ -133,15 +139,6 @@ Window
             id: filerLoad
             onAccepted:
             {
-                if(dbWay.text === "")
-                {
-                    mess.text = "Не найден файл БД"
-                    mess.open()
-                }
-                else
-                {
-
-                }
             }
         }
         Rectangle
