@@ -1,7 +1,7 @@
 #include "xlmodel.h"
 
-XLModel::XLModel() {}
-
+XLModel::XLModel(QObject *parent)
+    : QObject(parent){}
 
 bool XLModel::__extractData()
 {
@@ -79,7 +79,7 @@ bool XLModel::__extractData()
             __data.push_back(data);
             ++row;
             ++counter;
-            if((counter % currentCount) == 0) progressUpdated(counter, __length);
+            //if((counter % currentCount) == 0) progressUpdated(counter, __length);
         }
     }
     else return false;
@@ -118,7 +118,7 @@ bool XLModel::__saveData(const QString& way)
             return false;
         }
         ++i;
-        if((i % needcount) == 0) progressUpdated(i, __length);
+        //if((i % needcount) == 0) progressUpdated(i, __length);
     }
     db.close();
     return true;

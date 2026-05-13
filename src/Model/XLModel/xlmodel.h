@@ -7,6 +7,7 @@
 #include <QSql>
 #include <QSqlQuery>
 #include <QSqlError>
+#include <QObject>
 struct XLData
 {
     int transaction;
@@ -18,16 +19,16 @@ struct XLData
     QString date;
 };
 
-class XLModel
+class XLModel : public QObject
 {
+    Q_OBJECT
 public:
-    XLModel();
+    explicit XLModel(QObject *parent = nullptr);
     bool loadData(const QString& way);
     bool saveData(const QString& way);
     int getLength();
     void setWay(const QString& way);
     bool saveToXml(const QString& tabs, const QString& way, const QString& db_way);
-    ~XLModel();
 private:
     QVector<XLData> __data;
     bool __extractData();

@@ -3,6 +3,7 @@ import QtQuick.Window
 import QtQuick.Controls 2.15
 import QtQuick.Layouts
 import QtQuick.Dialogs
+import XMlLoader 1.0
 
 Window
 {
@@ -15,6 +16,10 @@ Window
     color: "#D9D9D9"
     flags: Qt.Window
 
+    OptionWindow_V
+    {
+
+    }
     Rectangle
     {
        id: dbWayBlockRect

@@ -1,19 +1,29 @@
-find_package(Qt6 6.2 COMPONENTS Quick REQUIRED Sql)
-find_package(Qt6 REQUIRED COMPONENTS SerialPort)
+find_package(Qt6 REQUIRED COMPONENTS Core Quick Sql)
 
-add_library(OptionWindow_V
-    STATIC
+set(OptionWindow_V_SOURCES
     optionwindow_v.cpp
+    optionwindow_v.h
 )
 
-target_link_libraries(OptionWindow_V PRIVATE Qt6::Quick)
-target_link_libraries(OptionWindow_V PRIVATE   Qt6::Sql)
-target_link_libraries(OptionWindow_V PRIVATE Qt6::SerialPort)
-target_link_libraries(OptionWindow_V PRIVATE XLModel)
+qt6_wrap_cpp(OptionWindow_V_MOC_SOURCES optionwindow_v.h)
 
-target_include_directories(OptionWindow_V INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+add_library(OptionWindow_V STATIC
+    ${OptionWindow_V_SOURCES}
+    ${OptionWindow_V_MOC_SOURCES}
+)
+
+target_link_libraries(OptionWindow_V PRIVATE
+    Qt6::Core
+    Qt6::Quick
+    Qt6::Sql
+    XLModel
+)
+
 target_include_directories(OptionWindow_V PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+target_include_directories(OptionWindow_V INTERFACE
+    ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Model/XLModel
 )
-
-#target_link_libraries(EmulatorView PUBLIC MainManager)

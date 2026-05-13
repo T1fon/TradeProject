@@ -1,6 +1,7 @@
 #include "optionwindow_v.h"
 
-OptionWindow_V::OptionWindow_V()
+OptionWindow_V::OptionWindow_V(QObject *parent)
+    : QObject(parent)
 {
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
     db.setDatabaseName(DEF_WAY);
@@ -23,7 +24,6 @@ OptionWindow_V::OptionWindow_V()
         }
         db.close();
     }
-
 }
 QString OptionWindow_V::saveDBWay(const QString& way)
 {

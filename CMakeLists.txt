@@ -9,7 +9,7 @@ project(TradeProject VERSION ${PROJECT_VERSION} LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 6.4 REQUIRED COMPONENTS Quick)
+find_package(Qt6 6.4 REQUIRED COMPONENTS Quick Sql)
 
 add_subdirectory(src)
 add_subdirectory(src/QXlsx/QXlsx)
@@ -44,7 +44,14 @@ set_target_properties(appTradeProject PROPERTIES
 target_link_libraries(appTradeProject
     PRIVATE Qt6::Quick
     QXlsx::QXlsx
+    Qt6::Sql
 )
+target_link_libraries(appTradeProject PRIVATE OptionWindow_V
+)
+target_include_directories(appTradeProject PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/View/OptionWindow
+)
+
 
 include(GNUInstallDirs)
 install(TARGETS appTradeProject
