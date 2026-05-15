@@ -3,7 +3,6 @@ import QtQuick.Window
 import QtQuick.Controls 2.15
 import QtQuick.Layouts
 import QtQuick.Dialogs
-import XMlLoader 1.0
 
 Window
 {
@@ -12,14 +11,10 @@ Window
 
     property real swidth : width / 100
     property real sheight : height / 100
+    property string buf
     title: "Опции"
     color: "#D9D9D9"
     flags: Qt.Window
-
-    OptionWindow_V
-    {
-
-    }
     Rectangle
     {
        id: dbWayBlockRect
@@ -68,6 +63,7 @@ Window
                horizontalAlignment: Text.AlignHCenter
                verticalAlignment: Text.AlignVCenter
                enabled: false
+               text: optionWindow.getDbWay()
            }
        }
 
@@ -90,6 +86,7 @@ Window
                onClicked:
                {
                    filer.open()
+
                }
            }
        }
@@ -99,7 +96,11 @@ Window
         id: filer
         onAccepted:
         {
-            dbWay.text = filer.currentFile
+
+            buf = filer.currentFile
+            dbWay.text = buf.replace("file:///", "")
+            optionWindow.saveDBWay(dbWay.text)
+
         }
     }
 
@@ -144,6 +145,8 @@ Window
             id: filerLoad
             onAccepted:
             {
+                buf = filerLoad.currentFile
+                optionWindow.saveDataFromXL(buf.replace("file:///", ""), dbWay.text)
             }
         }
         Rectangle

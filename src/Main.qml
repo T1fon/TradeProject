@@ -4,7 +4,6 @@ import QtQuick.Window
 import QtQuick.Dialogs
 import QtQuick.Layouts
 
-import XMlLoader 1.0
 import "View/OptionWindow"
 
 Window {
@@ -15,10 +14,6 @@ Window {
     property real swidth : width / 100
     property real sheight : height / 100
     color: "red"
-    OptionWindow_V
-    {
-
-    }
 
     property string opt_w: "View/OptionWindow/OptionWindow_V.qml"
     Loader

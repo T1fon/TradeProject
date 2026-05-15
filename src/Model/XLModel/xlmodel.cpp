@@ -21,7 +21,7 @@ bool XLModel::__extractData()
 
     for(int i = row; i <= __length; ++i)
     {
-        auto cell = __doc.cellAt(QString("C%1").arg(i));
+        auto cell = __doc.cellAt(QString("A%1").arg(i));
         if (cell && cell->value().toString() == target)
         {
             row = i;
@@ -30,13 +30,13 @@ bool XLModel::__extractData()
         }
     }
     if (falseExit) return false;
-    if ((row + 4) < __length)
+    if ((row + 5) < __length)
     {
-        row = row + 4;
+        row = row + 5;
         int counter = 0;
         int currentCount = 200;
         XLData data;
-        while( row < __length)
+        while( row < __length + 1)
         {
             auto nameCell = __doc.cellAt(QString("C%1").arg(row));
             if (!nameCell || nameCell->value().toString().isEmpty())
@@ -44,37 +44,40 @@ bool XLModel::__extractData()
                 falseExit = true;
                 break;
             }
-            auto date = __doc.cellAt(QString("C%16").arg(row));
-            data.date = date->value().toString();
+            auto date = __doc.cellAt(QString("P%1").arg(row));
+            QVariant cellValue = date->value();
 
-            auto trans = __doc.cellAt(QString("C%28").arg(row));
-            if (trans->value().toString() == "Дебет") data.transaction = 0; else data.transaction = 1;
+            QDate dateObj = QDate::fromJulianDay(cellValue.toDouble() + 2415019); // преобразование
+            data.Date = dateObj.toString("dd.MM.yyyy");
 
-            if (data.transaction == 0)
+            auto trans = __doc.cellAt(QString("AB%1").arg(row));
+            if (trans->value().toString() == "Дебет") data.Transaction = 0; else data.Transaction = 1;
+
+            if (data.Transaction == 0)
             {
-                auto valSum = __doc.cellAt(QString("C%24").arg(row));
+                auto valSum = __doc.cellAt(QString("X%1").arg(row));
                 data.valSum = valSum->value().toDouble();
 
-                auto sum = __doc.cellAt(QString("C%26").arg(row));
-                data.sum = sum->value().toDouble();
+                auto sum = __doc.cellAt(QString("Z%1").arg(row));
+                data.Sum = sum->value().toDouble();
             }
             else
             {
-                auto valSum = __doc.cellAt(QString("C%25").arg(row));
+                auto valSum = __doc.cellAt(QString("Y%1").arg(row));
                 data.valSum = valSum->value().toDouble();
 
-                auto sum = __doc.cellAt(QString("C%27").arg(row));
-                data.sum = sum->value().toDouble();
+                auto sum = __doc.cellAt(QString("AA%1").arg(row));
+                data.Sum = sum->value().toDouble();
             }
 
-            auto type = __doc.cellAt(QString("C%29").arg(row));
-            data.type = type->value().toString();
+            auto type = __doc.cellAt(QString("AC%1").arg(row));
+            data.Type = type->value().toString();
 
-            auto subtype = __doc.cellAt(QString("C%30").arg(row));
-            data.subtype = subtype->value().toString();
+            auto subtype = __doc.cellAt(QString("AD%1").arg(row));
+            data.Subtype = subtype->value().toString();
 
-            auto app = __doc.cellAt(QString("C%31").arg(row));
-            data.appointment = app->value().toString();
+            auto app = __doc.cellAt(QString("AE%1").arg(row));
+            data.Appointment = app->value().toString();
 
             __data.push_back(data);
             ++row;
@@ -90,7 +93,7 @@ bool XLModel::__saveData(const QString& way)
 {
     if(way.size() == 0) return false;
 
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "XlModel");
     db.setDatabaseName(way);
 
     if (!db.open())
@@ -98,26 +101,30 @@ bool XLModel::__saveData(const QString& way)
         qDebug() << "Ошибка открытия базы данных:" << db.lastError().text();
         return false;
     }
+    if (__data.size() == 0)
+    {
+        qDebug() << "Отсутствуют данные для сохранения;";
+        return false;
+    }
 
-    QSqlQuery query;
+    QSqlQuery query(db);
     int needcount = 200;
     for(int i = 0; i < __data.size(); ++i)
     {
-        query.prepare("INSERT INTO Data (id, Transaction, Sum, Appointment, Type, Subtype, Date) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        query.addBindValue(i);
-        query.addBindValue(__data[i].transaction);
-        query.addBindValue(__data[i].sum);
-        query.addBindValue(__data[i].appointment);
-        query.addBindValue(__data[i].type);
-        query.addBindValue(__data[i].subtype);
-        query.addBindValue(__data[i].date);
+        query.clear();
+        query.prepare("INSERT INTO Data (Tranzaction, Sum, Appointment, Type, Subtype, Date) VALUES (?, ?, ?, ?, ?, ?)");
+        query.addBindValue(__data[i].Transaction);
+        query.addBindValue(__data[i].Sum);
+        query.addBindValue(__data[i].Appointment);
+        query.addBindValue(__data[i].Type);
+        query.addBindValue(__data[i].Subtype);
+        query.addBindValue(__data[i].Date);
 
         if (!query.exec())
         {
             qDebug() << "Ошибка вставки данных:" << query.lastError().text();
-            return false;
+            break;
         }
-        ++i;
         //if((i % needcount) == 0) progressUpdated(i, __length);
     }
     db.close();

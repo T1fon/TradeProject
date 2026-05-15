@@ -10,13 +10,13 @@
 #include <QObject>
 struct XLData
 {
-    int transaction;
+    int Transaction = 0;
     double valSum;
-    double sum;
-    QString appointment;
-    QString type;
-    QString subtype;
-    QString date;
+    double Sum;
+    QString Appointment;
+    QString Type;
+    QString Subtype;
+    QString Date;
 };
 
 class XLModel : public QObject
