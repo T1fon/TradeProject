@@ -1,25 +1,39 @@
-#ifndef DATABASEMODEL_H
-#define DATABASEMODEL_H
-#include <QString>
-#include <QSql>
-#include <QSqlQuery>
-#include <QSqlError>
-#include <QSqlRecord>
-#include <QSqlDatabase>
+#pragma once
 
-class DataBaseModel
+#include <QSqlDatabase>
+#include <QSqlTableModel>
+#include <QObject>
+#include <QString>
+#include <QSqlQuery>
+#include <QDebug>
+#include <QSqlError>
+#include <QStandardPaths>
+#include <QDir>
+#include <QSqlRecord>
+
+class DataBaseModel : public QSqlTableModel
 {
+    Q_OBJECT
 public:
-    DataBaseModel(const QString& way);
+    explicit DataBaseModel(QObject *parent = nullptr);
     ~DataBaseModel();
-    void setQuery(const QString& query);
-    QString getResult();
+
+    bool setDatabasePath(const QString& path);
+    void setMainTable();
+    QString getLastError();
+    QString getDbWay();
+
+    bool request(const QString& query);
+    bool insert(const QString& query, const QVector<QString>& params);
+    bool select(const QString& query);
+    bool createDB();
+
 private:
     QSqlDatabase __db;
-    QString __query;
-    QString __result;
-    QString __db_way;
-    void __compliteQuery();
-};
+    QVariantList __lastQueryResult;
 
-#endif // DATABASEMODEL_H
+    QString __pathDB;
+    QString __responce;
+    QString __lastError;
+    QString __standartPatt = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/TradeProject/TradeProject.db";
+};

@@ -1,3 +1,13 @@
-#include "mainwindow.h"
+#include "MainWindow.h"
 
-MainWindow::MainWindow() {}
+MainWindow::MainWindow(QObject *parent)
+    : QObject(parent)
+    , __model(this)
+{
+    if(!__model.createDB())
+    {
+        qDebug() << "Ошибка создания и проверки БД";
+        return;
+    }
+}
+

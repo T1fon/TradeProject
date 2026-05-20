@@ -14,6 +14,14 @@ Window {
     property real swidth : width / 100
     property real sheight : height / 100
     color: "red"
+    Connections
+    {
+        target: optionWindow
+        onDataUpdated:
+        {
+
+        }
+    }
 
     property string opt_w: "View/OptionWindow/OptionWindow_V.qml"
     Loader

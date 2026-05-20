@@ -7,21 +7,7 @@ OptionWindow_V::OptionWindow_V(QObject *parent)
     QString dbPath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/TradeProject/TradeProject.db";
     __defDbWay = dbPath;
 
-    QDir dir(QFileInfo(dbPath).absolutePath());
-    if (!dir.exists()) {
-        if (!dir.mkpath(".")) {
-            qCritical() << "Не удалось создать папку для БД:" << dir.absolutePath();
-            return;
-        }
-    }
-    if(! __createOptionTable(dbPath))
-    {
-        qWarning() << "Не получилось создать таблицу options";
-        return;
-    }
-
-
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "OptionWindowDB");
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "dataBaseConnection");
     db.setDatabaseName(dbPath);
 
     if (!db.open()) {
@@ -70,11 +56,11 @@ QString OptionWindow_V::saveDBWay(const QString& way)
         if (QSqlDatabase::contains(connectionName))
             QSqlDatabase::removeDatabase(connectionName);
 
-        if(!__createOptionTable(way))
+        /*if(!__createOptionTable(way))
         {
             __mess = "Ошибка создания таблицы";
             return __mess;
-        }
+        }*/
         QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", connectionName);
         db.setDatabaseName(way);
         if (!db.open())
@@ -122,33 +108,12 @@ bool OptionWindow_V::saveDataFromXL(const QString& xlWay, const QString& dbWay)
         return false;
     }
     __mess = "";
+    emit dataLoaded();
     return true;
 }
 bool OptionWindow_V::saveDataToXL(const QString& tabs, const QString& way)
 {
    return __xlmodel.saveToXml(tabs,way,__dbWay);
-}
-
-bool OptionWindow_V::__createOptionTable(const QString& way)
-{
-    QSqlDatabase dbf = QSqlDatabase::addDatabase("QSQLITE", "OptionWindowDBcr");
-    dbf.setDatabaseName(way);
-
-    if (!dbf.open()) {
-        qCritical() << "Ошибка открытия базы данных:" << dbf.lastError().text();
-        return false;
-    }
-    QSqlQuery query(dbf);
-    if (!query.exec("CREATE TABLE IF NOT EXISTS Options ("
-                    "Theme STRING, "
-                    "Dbway STRING UNIQUE)")) {
-        qCritical() << "Ошибка создания таблицы Options:" << query.lastError().text();
-        dbf.close();
-        return false;
-    }
-    if(dbf.open())
-        dbf.close();
-    return true;
 }
 
 QString OptionWindow_V::getDbWay()

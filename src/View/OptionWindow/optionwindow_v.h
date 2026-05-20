@@ -11,6 +11,8 @@ class OptionWindow_V : public QObject
     Q_OBJECT
 public:
     explicit OptionWindow_V(QObject *parent = nullptr);
+Q_SIGNALS:
+    void dataLoaded();
 public slots:
     QString saveDBWay(const QString& way);
     bool saveDataFromXL(const QString& xlWay, const QString& dbWay);
@@ -18,7 +20,6 @@ public slots:
     QString getError();
     QString getDbWay();
 private:
-    bool __createOptionTable(const QString& way);
     void __saveNewWay(const QString& newWay);
     XLModel __xlmodel;
     QString __mess;
