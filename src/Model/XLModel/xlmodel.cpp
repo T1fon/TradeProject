@@ -50,24 +50,22 @@ bool XLModel::__extractData()
             QDate dateObj = QDate::fromJulianDay(cellValue.toDouble() + 2415019); // преобразование
             data.Date = dateObj.toString("dd.MM.yyyy");
 
+            auto inn =  __doc.cellAt(QString("V%1").arg(row));
+            data.INN = inn->value().toString();
             auto trans = __doc.cellAt(QString("AB%1").arg(row));
-            if (trans->value().toString() == "Дебет") data.Transaction = 0; else data.Transaction = 1;
+            if (trans->value().toString() == "Дебет") data.Transaction = "0"; else data.Transaction = "1";
 
-            if (data.Transaction == 0)
+            if (data.Transaction == "0")
             {
-                auto valSum = __doc.cellAt(QString("X%1").arg(row));
-                data.valSum = valSum->value().toDouble();
 
                 auto sum = __doc.cellAt(QString("Z%1").arg(row));
-                data.Sum = sum->value().toDouble();
+                data.Sum = sum->value().toString();
             }
             else
             {
-                auto valSum = __doc.cellAt(QString("Y%1").arg(row));
-                data.valSum = valSum->value().toDouble();
 
                 auto sum = __doc.cellAt(QString("AA%1").arg(row));
-                data.Sum = sum->value().toDouble();
+                data.Sum = sum->value().toString();
             }
 
             auto type = __doc.cellAt(QString("AC%1").arg(row));
@@ -89,52 +87,9 @@ bool XLModel::__extractData()
     if (falseExit) return false;
     return true;
 }
-bool XLModel::__saveData(const QString& way)
+QVector<XLData> XLModel::getData()
 {
-    if(way.size() == 0) return false;
-
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "XlModel");
-    db.setDatabaseName(way);
-
-    if (!db.open())
-    {
-        qDebug() << "Ошибка открытия базы данных:" << db.lastError().text();
-        return false;
-    }
-    if (__data.size() == 0)
-    {
-        qDebug() << "Отсутствуют данные для сохранения;";
-        return false;
-    }
-
-    QSqlQuery query(db);
-    int needcount = 200;
-    for(int i = 0; i < __data.size(); ++i)
-    {
-        query.clear();
-        query.prepare("INSERT INTO Data (Tranzaction, Sum, Appointment, Type, Subtype, Date) VALUES (?, ?, ?, ?, ?, ?)");
-        query.addBindValue(__data[i].Transaction);
-        query.addBindValue(__data[i].Sum);
-        query.addBindValue(__data[i].Appointment);
-        query.addBindValue(__data[i].Type);
-        query.addBindValue(__data[i].Subtype);
-        query.addBindValue(__data[i].Date);
-
-        if (!query.exec())
-        {
-            qDebug() << "Ошибка вставки данных:" << query.lastError().text();
-            break;
-        }
-        //if((i % needcount) == 0) progressUpdated(i, __length);
-    }
-    db.close();
-    return true;
-}
-bool XLModel::loadData(const QString& way)
-{
-    bool res;
-    res = __saveData(way);
-    return res;
+    return __data;
 }
 bool XLModel::saveData(const QString& way)
 {
@@ -151,55 +106,34 @@ void XLModel::setWay(const QString& way)
 {
     __way = way;
 }
-bool XLModel::saveToXml(const QString& tabs, const QString& way, const QString& db_way)
+bool XLModel::saveToXml(const QVector<QString> tab, const QString& way, const QList<QVariantMap>& data)
 {
-    QVector<QString> tab;
-    if (tabs.length() == 0) return false;
-    tab = tabs.split(';', Qt::SkipEmptyParts);
-    return __saveToXMl(tab, way, db_way);
+    return __saveToXMl(tab, way, data);
 }
 
-bool XLModel::__saveToXMl(const QVector<QString>& tabs, const QString& way, const QString& db_way)
+bool XLModel::__saveToXMl(const QVector<QString>& tab, const QString& way, const QList<QVariantMap>& data)
 {
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName(db_way);
-    if (!db.open()) {
-        qDebug() << "Ошибка открытия базы:" << db.lastError().text();
-        return false;
-    }
     QXlsx::Document xlsx;
 
-    for (int col = 0; col < tabs.size(); ++col) {
-        xlsx.write(1, col + 1, tabs[col]);
+    for (int col = 0; col < tab.size(); ++col) {
+        xlsx.write(1, col + 1, tab[col]);
     }
 
-    // Формируем запрос SELECT
-    QString queryStr = "SELECT ";
-    for (int i = 0; i < tabs.size(); ++i) {
-        if (i != 0) queryStr += ", ";
-        queryStr += tabs[i];
+    for (int row = 0; row < data.size(); ++row)
+    {
+        const auto& rowData = data[row];
+        for (int col = 0; col < tab.size(); ++col) {
+            QString tabName = tab[col];
+            QString value = rowData.value(tabName).toString();
+            xlsx.write(row + 2, col + 1, value);
+        }
     }
-    queryStr += " FROM Data";
 
-    QSqlQuery query(queryStr);
-    if (!query.exec()) {
-        qDebug() << "Ошибка выполнения запроса:" << query.lastError().text();
-        db.close();
+    bool result = xlsx.saveAs(way);
+    if (!result) {
+        qDebug() << "Ошибка сохранения файла в" << way;
         return false;
     }
-
-    int rowIndex = 2; // дата с 2-й строки
-    while (query.next()) {
-        for (int col = 0; col < tabs.size(); ++col) {
-            QString value = query.value(col).toString();
-            xlsx.write(rowIndex, col + 1, value);
-        }
-        ++rowIndex;
-    }
-
-    // Сохраняем файл
-    bool result = xlsx.saveAs(way);
-    db.close();
     return result;
 }
 

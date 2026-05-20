@@ -22,6 +22,7 @@ public:
     void setMainTable();
     QString getLastError();
     QString getDbWay();
+    QList<QVariantMap> getLastQuery();
 
     bool request(const QString& query);
     bool insert(const QString& query, const QVector<QString>& params);
@@ -30,7 +31,7 @@ public:
 
 private:
     QSqlDatabase __db;
-    QVariantList __lastQueryResult;
+    QList<QVariantMap> __lastQueryResult;
 
     QString __pathDB;
     QString __responce;

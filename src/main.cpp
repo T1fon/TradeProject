@@ -2,15 +2,20 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include "optionwindow_v.h"
+#include "databasemodel.h"
 
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
-
+    DataBaseModel dbModel;
     QQmlApplicationEngine engine;
     //qmlRegisterType<OptionWindow_V>("XMlLoader", 1, 0, "OptionWindow_V");
-    OptionWindow_V *optionWindow = new OptionWindow_V(&engine);
+
+    engine.rootContext()->setContextProperty("dbModel", &dbModel);
+
+    OptionWindow_V *optionWindow = new OptionWindow_V(&dbModel,&engine);
     engine.rootContext()->setContextProperty("optionWindow", optionWindow);
+
     const QUrl url(u"qrc:/TradeProject/src/Main.qml"_qs);
     QObject::connect(
         &engine,

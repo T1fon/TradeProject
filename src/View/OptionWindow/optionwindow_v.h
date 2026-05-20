@@ -1,16 +1,18 @@
 #ifndef OPTIONWINDOW_V_H
 #define OPTIONWINDOW_V_H
 #include "XLModel.h"
-#include <QObject>
-#include <QStandardPaths>
-#include <QDir>
+#include "databasemodel.h"
 
+#include <QObject>
+#include <QQmlApplicationEngine>
+#include <QQmlContext>
 
 class OptionWindow_V : public QObject
 {
     Q_OBJECT
 public:
-    explicit OptionWindow_V(QObject *parent = nullptr);
+    explicit OptionWindow_V(DataBaseModel* dbModel, QObject* parent);
+    Q_INVOKABLE DataBaseModel* getDbModel() { return __dbModel; }
 Q_SIGNALS:
     void dataLoaded();
 public slots:
@@ -20,11 +22,11 @@ public slots:
     QString getError();
     QString getDbWay();
 private:
-    void __saveNewWay(const QString& newWay);
     XLModel __xlmodel;
     QString __mess;
     QString __dbWay;
-    QString __defDbWay;
+    QString __defDbWay = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/TradeProject/TradeProject.db";
+    DataBaseModel* __dbModel = nullptr;
 };
 
 #endif // OPTIONWINDOW_V_H

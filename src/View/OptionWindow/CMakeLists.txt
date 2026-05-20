@@ -17,6 +17,7 @@ target_link_libraries(OptionWindow_V PRIVATE
     Qt6::Quick
     Qt6::Sql
     XLModel
+    DataBaseModel
 )
 
 target_include_directories(OptionWindow_V PRIVATE
@@ -26,4 +27,5 @@ target_include_directories(OptionWindow_V PRIVATE
 target_include_directories(OptionWindow_V INTERFACE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/../../Model/XLModel
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../Model/DataBaseModel
 )

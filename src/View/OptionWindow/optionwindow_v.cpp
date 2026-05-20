@@ -1,48 +1,20 @@
 #include "optionwindow_v.h"
 
-OptionWindow_V::OptionWindow_V(QObject *parent)
-    : QObject(parent)
+OptionWindow_V::OptionWindow_V(DataBaseModel* dbModel, QObject* parent)
+    : QObject(parent), __dbModel(dbModel)
 {
-
-    QString dbPath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/TradeProject/TradeProject.db";
-    __defDbWay = dbPath;
-
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "dataBaseConnection");
-    db.setDatabaseName(dbPath);
-
-    if (!db.open()) {
-        qDebug() << "Ошибка открытия базы данных:" << db.lastError().text();
+    if(!__dbModel->createDB())
+    {
+        qDebug() << "Ошибка создания базы";
         return;
     }
-    QSqlQuery query(db);
-
-    if (query.exec("SELECT DbWay FROM Options"))
-    {
-        if (query.next())
-        {
-            __dbWay = query.value(0).toString();
-        } else
-        {
-
-            __dbWay = dbPath;
-            query.prepare("INSERT INTO Options (DbWay) VALUES (?)");
-            query.addBindValue(__dbWay);
-            if (!query.exec()) {
-                qWarning() << "Не удалось сохранить путь по умолчанию:" << query.lastError().text();
-            }
-        }
-    }
-    else
-    {
-        qWarning() << "Ошибка чтения DbWay из Options:" << query.lastError().text();
-        __dbWay = dbPath;
-    }
+    __dbWay = __dbModel->getDbWay();
 
     if (!__dbWay.isEmpty() && !QFile::exists(__dbWay))
     {
         qWarning() << "Файл БД не найден по сохранённому пути:" << __dbWay;
-        qWarning() << "Используем путь по умолчанию:" << dbPath;
-        __dbWay = dbPath; // Фоллбэк
+        qWarning() << "Используем путь по умолчанию:";
+        __dbWay = __defDbWay;
     }
 
     qDebug() << "База данных успешно инициализирована:" << __dbWay;
@@ -52,37 +24,10 @@ QString OptionWindow_V::saveDBWay(const QString& way)
 
     if( __dbWay != way)
     {
-        const QString connectionName = "OptionWindowDBConnection";
-        if (QSqlDatabase::contains(connectionName))
-            QSqlDatabase::removeDatabase(connectionName);
-
-        /*if(!__createOptionTable(way))
-        {
-            __mess = "Ошибка создания таблицы";
-            return __mess;
-        }*/
-        QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", connectionName);
-        db.setDatabaseName(way);
-        if (!db.open())
-        {
-            __mess = "Ошибка открытия базы:" + db.lastError().text();
-            qDebug() << __mess;
-            return __mess;
-        }
-        QSqlQuery query(db);
-        query.prepare("UPDATE Options SET Dbway = ?");
-        query.addBindValue(way);
-        if (!query.exec())
-        {
-            __mess =  "Ошибка выполнения запроса:" + query.lastError().text();
-            qDebug() << __mess;
-            db.close();
-            return __mess;
-        }
-        __saveNewWay(way);
-        __dbWay = way;
-        db.close();
-
+        if(__dbModel->setDatabasePath(way))
+        return "";
+      else
+            return __dbModel->getLastError();
     }
     return "";
 }
@@ -93,6 +38,11 @@ QString OptionWindow_V::getError()
 }
 bool OptionWindow_V::saveDataFromXL(const QString& xlWay, const QString& dbWay)
 {
+    if(dbWay == "" || xlWay =="")
+    {
+        __mess = "Отсутсвие путей сохранения";
+        return false;
+    }
     __mess = "";
     if(! __xlmodel.saveData(xlWay))
     {
@@ -100,12 +50,34 @@ bool OptionWindow_V::saveDataFromXL(const QString& xlWay, const QString& dbWay)
         return false;
     }
     if (__dbWay != dbWay)
-        __dbWay = dbWay;
-
-    if(! __xlmodel.loadData(dbWay))
     {
-        __mess = "Ошибка загрузки данных в БД";
+        __dbWay = dbWay;
+        saveDBWay(dbWay);
+    }
+    QVector<XLData> buf = __xlmodel.getData();
+    if (buf.size() == 0)
+    {
+        qDebug() << "Отсутствуют данные для сохранения;";
         return false;
+    }
+    int needcount = 200;
+    QVector<QString> quer;
+    for(int i = 0; i < buf.size(); ++i)
+    {
+        quer.clear();
+        quer.append(buf[i].INN);
+        quer.append(buf[i].Transaction);
+        quer.append(buf[i].Sum);
+        quer.append(buf[i].Appointment);
+        quer.append(buf[i].Type);
+        quer.append(buf[i].Subtype);
+        quer.append(buf[i].Date);
+        if(!__dbModel->insert("INSERT INTO Data (INN, Tranzaction, Sum, Appointment, Type, Subtype, Date) VALUES (?, ?, ?, ?, ?, ?, ?)", quer))
+        {
+            qDebug() << "Ошибка вставки данных:" << __dbModel->getLastError();
+            break;
+        }
+        //if((i % needcount) == 0) progressUpdated(i, __length);
     }
     __mess = "";
     emit dataLoaded();
@@ -113,30 +85,41 @@ bool OptionWindow_V::saveDataFromXL(const QString& xlWay, const QString& dbWay)
 }
 bool OptionWindow_V::saveDataToXL(const QString& tabs, const QString& way)
 {
-   return __xlmodel.saveToXml(tabs,way,__dbWay);
+    QVector<QString> tab;
+    if (tabs.length() == 0) return false;
+    tab = tabs.split(';', Qt::SkipEmptyParts);
+
+    QString queryStr = "SELECT ";
+    for (int i = 0; i < tab.size(); ++i)
+    {
+        if (i != 0) queryStr += ", ";
+        queryStr += tab[i];
+    }
+    queryStr += " FROM Data";
+
+    if (!__dbModel->select(queryStr))
+    {
+        qDebug() << "Ошибка выполнения запроса:" << __dbModel->lastError();
+        return false;
+    }
+
+    if (__dbModel->getLastQuery().isEmpty())
+    {
+        qDebug() << "Результат запроса пуст!";
+        return false;
+    }
+
+    bool saveResult = __xlmodel.saveToXml(tab, way, __dbModel->getLastQuery());
+
+    if (!saveResult)
+    {
+        qDebug() << "Ошибка при сохранении данных в Excel/XML";
+        return false;
+    }
 }
 
 QString OptionWindow_V::getDbWay()
 {
     return __dbWay;
 }
-void OptionWindow_V::__saveNewWay(const QString& newWay)
-{
-    QSqlDatabase dbf = QSqlDatabase::addDatabase("QSQLITE", "OptionWindowDBcr");
-    dbf.setDatabaseName(__defDbWay);
 
-    if (!dbf.open())
-    {
-        return;
-    }
-    QSqlQuery query(dbf);
-    query.prepare("UPDATE Options SET Dbway = ?");
-    query.addBindValue(newWay);
-    if(!query.exec())
-    {
-        dbf.close();
-        return;
-    }
-    if(dbf.open())
-        dbf.close();
-}

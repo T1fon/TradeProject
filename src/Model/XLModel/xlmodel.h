@@ -10,9 +10,9 @@
 #include <QObject>
 struct XLData
 {
-    int Transaction = 0;
-    double valSum;
-    double Sum;
+    QString Transaction = "0";
+    QString INN;
+    QString Sum;
     QString Appointment;
     QString Type;
     QString Subtype;
@@ -24,16 +24,15 @@ class XLModel : public QObject
     Q_OBJECT
 public:
     explicit XLModel(QObject *parent = nullptr);
-    bool loadData(const QString& way);
     bool saveData(const QString& way);
     int getLength();
+    QVector<XLData> getData();
     void setWay(const QString& way);
-    bool saveToXml(const QString& tabs, const QString& way, const QString& db_way);
+    bool saveToXml(const QVector<QString> tab, const QString& way, const QList<QVariantMap>& data);
 private:
     QVector<XLData> __data;
     bool __extractData();
-    bool __saveData(const QString& way);
-    bool __saveToXMl(const QVector<QString>& tabs, const QString& way, const QString& db_way);
+    bool __saveToXMl(const QVector<QString>& tabs, const QString& way, const QList<QVariantMap>& data);
     QString __way;
     int __length;
 signals:

@@ -19,14 +19,24 @@ DataBaseModel::DataBaseModel(QObject *parent)
     }
     else
     {
-        if(select("SELECT DbWay from Options"))
+        if (select("SELECT DbWay FROM Options"))
         {
-            if(__pathDB != __lastQueryResult.at(0))
+            if (!__lastQueryResult.isEmpty())
             {
-                if(!setDatabasePath(__lastQueryResult.at(0).toString()))
+                QVariantMap firstRow = __lastQueryResult.at(0);
+                QString newPath = firstRow.value("DbWay").toString();
+
+                if (__pathDB != newPath)
                 {
-                    qDebug() << "Не удалось изменить путь к Базе. Испоьзуется стандратный";
+                    if (!setDatabasePath(__pathDB))
+                    {
+                        qDebug() << "Не удалось изменить путь к базе. Используется стандартный";
+                    }
                 }
+            }
+            else
+            {
+                qDebug() << "Результат запроса пуст!";
             }
         }
     }
@@ -82,7 +92,7 @@ bool DataBaseModel::insert(const QString& query, const QVector<QString>& params)
 }
 bool DataBaseModel::select(const QString& query)
 {
-    QSqlQuery qu;
+    QSqlQuery qu(__db);
     qu.prepare(query);
     if (!qu.exec(query))
     {
@@ -185,6 +195,11 @@ QString DataBaseModel::getLastError()
 {
     return __lastError;
 }
+QList<QVariantMap> DataBaseModel::getLastQuery()
+{
+    return __lastQueryResult;
+}
+
 
 DataBaseModel::~DataBaseModel()
 {
