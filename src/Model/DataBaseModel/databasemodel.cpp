@@ -12,23 +12,23 @@ DataBaseModel::DataBaseModel(QObject *parent)
         createDB();
         QVector<QString> params;
         params.append(__standartPatt);
-        if(!insert("INSERT INTO Options (DbWay) VALUES (?)",params))
+        if(!insert("INSERT INTO Options (Dbway) VALUES (?)",params))
         {
             return;
         }
     }
     else
     {
-        if (select("SELECT DbWay FROM Options"))
+        if (select("SELECT Dbway FROM Options"))
         {
             if (!__lastQueryResult.isEmpty())
             {
                 QVariantMap firstRow = __lastQueryResult.at(0);
-                QString newPath = firstRow.value("DbWay").toString();
+                QString newPath = firstRow.value("Dbway").toString();
 
-                if (__pathDB != newPath)
+                if (__pathDB != newPath && newPath != "")
                 {
-                    if (!setDatabasePath(__pathDB))
+                    if (!setDatabasePath(newPath))
                     {
                         qDebug() << "Не удалось изменить путь к базе. Используется стандартный";
                     }
@@ -45,7 +45,16 @@ DataBaseModel::DataBaseModel(QObject *parent)
 bool DataBaseModel::setDatabasePath(const QString& path)
 {
     if(__db.open())
+    {
+        QVector<QString> params;
+        params.append(path);
+        if(!insert("UPDATE Options SET Dbway = ?",params))
+        {
+            qDebug() << "[DB_ERROR]: Не удалось изменить местополжение";
+            return false;
+        }
         __db.close();
+    }
     __db = QSqlDatabase::addDatabase("QSQLITE", "dataBaseConnection");
     __db.setDatabaseName(path);
     if (!__db.open()) {
@@ -88,12 +97,31 @@ bool DataBaseModel::insert(const QString& query, const QVector<QString>& params)
         qDebug() << "[DB_ERROR] insert fail " << qu.lastError().text();
         return false;
     }
+    __lastId = qu.lastInsertId().toInt();
+    return true;
+}
+bool DataBaseModel::insert(const QString& query, const QVector<int>& params)
+{
+    QSqlQuery qu(__db);
+    qu.prepare(query);
+    for(int i = 0; i < params.size(); ++i)
+    {
+        qu.bindValue(i, params[i]);
+    }
+    if (!qu.exec())
+    {
+        __lastError = "Не удалось выполнить запрос " + qu.lastError().text();
+        qDebug() << "[DB_ERROR] insert fail " << qu.lastError().text();
+        return false;
+    }
+    __lastId = qu.lastInsertId().toInt();
     return true;
 }
 bool DataBaseModel::select(const QString& query)
 {
     QSqlQuery qu(__db);
     qu.prepare(query);
+    __lastQueryResult.clear();
     if (!qu.exec(query))
     {
         __lastError = qu.lastError().text();
@@ -124,65 +152,102 @@ bool DataBaseModel::createDB()
         }
     }
 
-    QString query = "BEGIN TRANSACTION;"
-                    "CREATE TABLE IF NOT EXIST Contr_question "
-                    "("
-                    "id  INTEGER PRIMARY KEY AUTOINCREMENT,"
-                    "Question INTEGER,"
-                    "Answer STRING"
-                    ");"
+    QStringList queries = {
+        "CREATE TABLE IF NOT EXISTS Contr_question "
+        "("
+            "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "Question INTEGER,"
+            "Answer STRING"
+        ");",
 
-                    "CREATE TABLE IF NOT EXIST Login "
-                    "("
-                    "id  INTEGER  PRIMARY KEY AUTOINCREMENT,"
-                    "Password  STRING (30)  NOT NULL  UNIQUE,"
-                    "Name  INTEGER (30) NOT NULL  UNIQUE,"
-                    "lvl   INTEGER (1)  NOT NULL  DEFAULT (0),"
-                    "Question INTEGER  REFERENCES contr_question (id)"
-                    ");"
+        "CREATE TABLE IF NOT EXISTS Login "
+        "("
+            "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "Password STRING NOT NULL UNIQUE,"
+            "Name STRING NOT NULL UNIQUE,"
+            "lvl INTEGER NOT NULL DEFAULT 0,"
+            "Question INTEGER REFERENCES Contr_question(id)"
+        ");",
 
-                    "CREATE TABLE IF NOT EXIST Login "
-                    "("
-                    "Id  INTEGER PRIMARY KEY AUTOINCREMENT,"
-                    "Name  STRING  NOT NULL,"
-                    "Surname  STRING,"
-                    "Login_id INTEGER REFERENCES Login (id),"
-                    "Img  STRING"
-                    ");"
+        "CREATE TABLE IF NOT EXISTS Manager "
+        "("
+            "Id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "Name STRING NOT NULL,"
+            "Surname STRING,"
+            "Login_id INTEGER REFERENCES Login(id),"
+            "Img STRING"
+        ");",
 
-                    "CREATE TABLE IF NOT EXIST Client "
-                    "("
-                    "Id INTEGER PRIMARY KEY AUTOINCREMENT,"
-                    "Name STRING  NOT NULL,"
-                    "Phones  STRING,"
-                    "INN     STRING,"
-                    "Login_id INTEGER REFERENCES Login (id) NOT NULL,"
-                    "Manager_id INTEGER REFERENCES Manager (Id),"
-                    "Img  STRING,"
-                    ");"
+        "CREATE TABLE IF NOT EXISTS Client "
+        "("
+            "Id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "Name STRING NOT NULL,"
+            "Phones STRING,"
+            "INN STRING,"
+            "Login_id INTEGER REFERENCES Login(id),"
+            "Manager_id INTEGER REFERENCES Manager(Id),"
+            "Img STRING"
+        ");",
 
-                    "CREATE TABLE IF NOT EXIST Counter_manager "
-                    "("
-                    "contr_id  INTEGER REFERENCES Client (Id),"
-                    "data_id INTEGER REFERENCES Data (Id)"
-                    ");"
+        "CREATE TABLE IF NOT EXISTS Counterparty "
+        "("
+            "Id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "Name STRING NOT NULL,"
+            "INN STRING NOT NULL,"
+            "KPP STRING,"
+            "Img STRING,"
+            "Client_id INTEGER REFERENCES Client(Id),"
+            "OKVED STRING,"
+            "City STRING,"
+            "Address STRING,"
+            "Phones STRING,"
+            "Emails STRING"
+        ");",
 
-                    "CREATE TABLE IF NOT EXIST counter_client "
-                    "("
-                    "counter_id INTEGER REFERENCES Counterparty (id),"
-                    "Client_id  INTEGER REFERENCES Client (Id) "
-                    ");"
+        "CREATE TABLE IF NOT EXISTS Data "
+        "("
+            "Id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "Tranzaction STRING NOT NULL,"
+            "Sum STRING NOT NULL,"
+            "Appointment STRING,"
+            "Type STRING,"
+            "Subtype STRING,"
+            "Date STRING NOT NULL"
+        ");",
 
-                    "CREATE TABLE IF NOT EXIST Counter_client "
-                    "("
-                    "counter_id INTEGER REFERENCES Counterparty (id),"
-                    "Client_id  INTEGER REFERENCES Client (Id) "
-                    ");";
 
-    if(!request(query))
-    {
-        qDebug() << __lastError;
-        return false;
+        "CREATE TABLE IF NOT EXISTS Counter_manager "
+        "("
+            "counter_id INTEGER REFERENCES Client(Id),"
+            "manager_id INTEGER REFERENCES Data(Id)"
+        ");",
+
+        "CREATE TABLE IF NOT EXISTS Counter_data "
+        "("
+            "counter_id INTEGER REFERENCES Counterparty(Id),"
+            "data_id INTEGER REFERENCES Data(Id)"
+        ");",
+
+        "CREATE TABLE IF NOT EXISTS Counter_client "
+        "("
+            "Counter_id INTEGER REFERENCES Counterparty(Id),"
+            "Client_id INTEGER REFERENCES Client(Id)"
+        ");",
+        "CREATE TABLE IF NOT EXISTS Options "
+        "("
+        "Theme STRING,"
+        "Dbway STRING"
+        ");"
+    };
+
+    for (const QString &query : queries) {
+        if (!request(query))
+        {
+            qDebug() << "[DB_ERROR]: Ошибка при создании таблицы:"
+                     << __db.lastError().text()
+                     << "\nЗапрос:" << query;
+            return false;
+        }
     }
     return true;
 }
@@ -200,7 +265,10 @@ QList<QVariantMap> DataBaseModel::getLastQuery()
     return __lastQueryResult;
 }
 
-
+int DataBaseModel::getLastId()
+{
+    return __lastId;
+}
 DataBaseModel::~DataBaseModel()
 {
     if(__db.open())

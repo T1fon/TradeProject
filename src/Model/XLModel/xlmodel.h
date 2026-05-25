@@ -12,6 +12,7 @@ struct XLData
 {
     QString Transaction = "0";
     QString INN;
+    QString Name;
     QString Sum;
     QString Appointment;
     QString Type;

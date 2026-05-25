@@ -15,13 +15,19 @@ public:
     Q_INVOKABLE DataBaseModel* getDbModel() { return __dbModel; }
 Q_SIGNALS:
     void dataLoaded();
+public:
 public slots:
     QString saveDBWay(const QString& way);
-    bool saveDataFromXL(const QString& xlWay, const QString& dbWay);
+
+    bool saveDataFromXL(const QString& xlWay, const QString& dbWay, const QString& clientId);
+
     bool saveDataToXL(const QString& tabs, const QString& way);
     QString getError();
     QString getDbWay();
 private:
+    bool __processCounterparties(const QString& clientId);
+    bool __processTransactions();
+
     XLModel __xlmodel;
     QString __mess;
     QString __dbWay;

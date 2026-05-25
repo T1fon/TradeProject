@@ -23,9 +23,11 @@ public:
     QString getLastError();
     QString getDbWay();
     QList<QVariantMap> getLastQuery();
+    int getLastId();
 
     bool request(const QString& query);
     bool insert(const QString& query, const QVector<QString>& params);
+    bool insert(const QString& query, const QVector<int>& params);
     bool select(const QString& query);
     bool createDB();
 
@@ -36,5 +38,6 @@ private:
     QString __pathDB;
     QString __responce;
     QString __lastError;
+    int __lastId;
     QString __standartPatt = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/TradeProject/TradeProject.db";
 };

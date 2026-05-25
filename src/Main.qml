@@ -5,6 +5,7 @@ import QtQuick.Dialogs
 import QtQuick.Layouts
 
 import "View/OptionWindow"
+import "View/UserWindow"
 
 Window {
     width: 1920
@@ -24,6 +25,7 @@ Window {
     }
 
     property string opt_w: "View/OptionWindow/OptionWindow_V.qml"
+    property string us_w: "View/UserWindow/UserWindow.qml"
     Loader
     {
         id: win_loader
@@ -237,6 +239,13 @@ Window {
                 height: sheight * 2.5
                 text: "Настройка профиля";
                 font.pixelSize: swidth * 1.25
+                onClicked:
+                {
+                    win_loader.source = us_w
+                    win_loader.item.show()
+                    win_loader.item.raise()
+                    win_loader.item.requestActivate()
+                }
             }
             MenuItem
             {

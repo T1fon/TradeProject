@@ -44,6 +44,9 @@ bool XLModel::__extractData()
                 falseExit = true;
                 break;
             }
+            auto name =  __doc.cellAt(QString("U%1").arg(row));
+            data.Name = name->value().toString();
+
             auto date = __doc.cellAt(QString("P%1").arg(row));
             QVariant cellValue = date->value();
 

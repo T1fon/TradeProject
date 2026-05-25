@@ -228,12 +228,12 @@ Window
                 {
                     id: addText
                     width: parent.width
-                    height: parent.height
-                    font.pixelSize: swidth * 3.5
+                    height: implicitHeight
+                    font.pixelSize: swidth * 2.2
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                     anchors.fill: parent
-                    wrapMode: Text.WordWrap
+                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 }
             }
         }
@@ -292,7 +292,7 @@ Window
         id: emailsRect
         width: parent.width
         height: sheight * 9
-        y: phonesRect.y + phonesRect.height + sheight
+        y: phonesRect.y + phonesRect.height
         color: "#D9D9D9"
         Rectangle
         {
@@ -327,22 +327,16 @@ Window
                 {
                     id: pemailsText
                     width: parent.width
-                    height: parent.height
-                    font.pixelSize: swidth * 2.5
+                    height: implicitHeight
+                    font.pixelSize: swidth * 2.2
                     horizontalAlignment: Text.AlignLeft
                     verticalAlignment: Text.AlignVCenter
                     anchors.fill: parent
-                    wrapMode: Text.WordWrap
+                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 }
             }
         }
     }
-    Rectangle
-    {
-        id: managerRect
-
-    }
-
     Rectangle
     {
         id: deleterTextRect

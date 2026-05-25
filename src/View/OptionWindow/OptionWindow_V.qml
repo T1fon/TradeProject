@@ -12,6 +12,7 @@ Window
     property real swidth : width / 100
     property real sheight : height / 100
     property string buf
+    property string clientId: "1"
     title: "Опции"
     color: "#D9D9D9"
     flags: Qt.Window
@@ -145,8 +146,9 @@ Window
             id: filerLoad
             onAccepted:
             {
+                ///Заглушка по clientId. Добавить выпадающий список и из него брать значения
                 buf = filerLoad.currentFile
-                optionWindow.saveDataFromXL(buf.replace("file:///", ""), dbWay.text)
+                optionWindow.saveDataFromXL(buf.replace("file:///", ""), dbWay.text, clientId)
             }
         }
         Rectangle
